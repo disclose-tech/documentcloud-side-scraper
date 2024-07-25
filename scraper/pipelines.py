@@ -425,11 +425,14 @@ class MailPipeline:
             source_filename: {item["source_filename"]}
             source_file_url: {item["source_file_url"]}
             source_page_url: {item["source_page_url"]}
+            event_data_key: {item["event_data_key"]}
             """
 
             return item_string
 
-        subject = f"SIDE Scraper (New: {len(self.scraped_items)} )"
+        subject = (
+            f"SIDE Scraper {str(spider.target_year)} (New: {len(self.scraped_items)} )"
+        )
 
         # errors_content = f"ERRORS ({len(self.items_with_error)})\n\n" + "\n\n".join(
         #     [print_item(item, error=True) for item in self.items_with_error]
