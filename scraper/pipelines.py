@@ -205,14 +205,14 @@ class BeautifyPipeline:
         if item["file_from_zip"]:
 
             item["title"] = " - ".join(
-                # [x.split(".")[0] for x in filepath.split("/")[2:]]
+                # folder1/folder2/document.pdf => folder1 - folder2 - document
                 [
                     x
                     for x in item["local_file_path"].split("/")[2:-1]
                     + [item["local_file_path"].split("/")[-1].split(".")[0]]
                 ]
             )
-        item["project"] = item["project"].replace("_", " ")
+        item["title"] = item["title"].replace("_", " ")
         item["title"] = item["title"].rstrip(".,")
         item["title"] = item["title"].strip()
         item["title"] = item["title"][0].capitalize() + item["title"][1:]
@@ -274,7 +274,6 @@ class UploadPipeline:
         # File path and event_data_key
         if item["file_from_zip"]:
             file_path = item["local_file_path"]
-            print("DEBUG: ZIP PROCESSED!")
 
             item["source_file_zip_path"] = os.path.join(
                 *item["local_file_path"].split(os.sep)[2:]
