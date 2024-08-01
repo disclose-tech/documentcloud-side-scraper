@@ -19,7 +19,7 @@ class DocumentItem(Item):
     authority = Field()
 
     source_file_url = Field()
-    source_file_name = Field()
+    source_filename = Field()
     source_page_url = Field()
 
     publication_date = Field()

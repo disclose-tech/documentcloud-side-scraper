@@ -115,17 +115,17 @@ class CategoryPipeline:
 
 
 class SourceFileNamePipeline:
-    """Adds the source_file_name field based on source_file_url, or local_file_path for zip."""
+    """Adds the source_filename field based on source_file_url, or local_file_path for zip."""
 
     def process_item(self, item, spider):
 
         adapter = ItemAdapter(item)
 
-        if not adapter.get("source_file_name"):
+        if not adapter.get("source_filename"):
 
             path = urlparse(item["source_file_url"]).path
 
-            item["source_file_name"] = os.path.basename(path)
+            item["source_filename"] = os.path.basename(path)
 
         return item
 
@@ -268,7 +268,7 @@ class UploadPipeline:
 
     def process_item(self, item, spider):
 
-        filename, file_extension = os.path.splitext(item["source_file_name"])
+        filename, file_extension = os.path.splitext(item["source_filename"])
         file_extension = file_extension.lower()
 
         # File path and event_data_key
@@ -300,7 +300,7 @@ class UploadPipeline:
                     "event_data_key": item["event_data_key"],
                     "source_scraper": "SIDE Scraper",
                     "source_file_url": item["source_file_url"],
-                    "source_file_name": item["source_file_name"],
+                    "source_filename": item["source_filename"],
                     "source_page_url": item["source_page_url"],
                     "publication_date": item["publication_date"],
                     "publication_time": item["publication_time"],
