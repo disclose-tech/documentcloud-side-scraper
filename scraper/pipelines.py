@@ -208,8 +208,10 @@ class BeautifyPipeline:
                 # folder1/folder2/document.pdf => folder1 - folder2 - document
                 [
                     x
+                    # folders
                     for x in item["local_file_path"].split("/")[2:-1]
-                    + [item["local_file_path"].split("/")[-1].split(".")[0]]
+                    # filename without extension
+                    + [os.path.splitext(os.path.basename(item["local_file_path"]))[0]]
                 ]
             )
         item["title"] = item["title"].replace("_", " ")
