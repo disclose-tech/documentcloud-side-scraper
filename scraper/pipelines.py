@@ -387,10 +387,13 @@ class UploadPipeline:
         """Update event data when the spider closes."""
 
         if not spider.dry_run and spider.run_id:
-            spider.store_event_data(spider.event_data)
-            spider.logger.info(
-                f"Uploaded event data ({len(spider.event_data['documents'])} documents, {len(spider.event_data['zips'])} zip files)"
-            )
+            if spider.event_data:
+                spider.store_event_data(spider.event_data)
+                spider.logger.info(
+                    f"Uploaded event data ({len(spider.event_data['documents'])} documents, {len(spider.event_data['zips'])} zip files)"
+                )
+            else:
+                spider.logger.info("No event data to upload.")
 
         # if not spider.run_id:
         #     with open("event_data.json", "w") as file:
