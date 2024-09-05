@@ -248,7 +248,9 @@ class UploadPipeline:
 
         if not spider.dry_run:
             try:
+                spider.logger.info("Trying to load event_data...")
                 spider.event_data = spider.load_event_data()
+                spider.logger.info("Event_data loaded.")
 
             except Exception as e:
                 raise Exception("Error loading event data").with_traceback(
@@ -258,7 +260,7 @@ class UploadPipeline:
         else:
             spider.event_data = None
 
-        if spider.event_data is None:
+        if not spider.event_data:
             spider.event_data = {"documents": {}, "zips": {}}
 
         if spider.dry_run:
