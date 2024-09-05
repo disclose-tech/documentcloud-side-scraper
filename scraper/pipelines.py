@@ -288,32 +288,29 @@ class UploadPipeline:
             file_path = item["source_file_url"]
             item["event_data_key"] = item["source_file_url"]
 
-        if not spider.dry_run:
-
-            if file_extension not in SUPPORTED_EXTENSIONS:
-                spider.logger.warning(
-                    f"Unsupported filetype, not uploading {item['source_file_name']} (url: {item['source_file_url']}, page: {item['source_page_url']}) "
-                )
-            else:  # supported file extension
-                data = {
-                    "authority": item["authority"],
-                    "category": item["category"],
-                    "category_local": item["category_local"],
-                    "event_data_key": item["event_data_key"],
-                    "source_scraper": "SIDE Scraper",
-                    "source_file_url": item["source_file_url"],
-                    "source_filename": item["source_filename"],
-                    "source_page_url": item["source_page_url"],
-                    "publication_date": item["publication_date"],
-                    "publication_time": item["publication_time"],
-                    "publication_datetime": item["publication_datetime"],
-                    "year": str(item["year"]),
-                }
-
-                if item["file_from_zip"]:
-                    data["source_file_zip_path"] = item["source_file_zip_path"]
-
-                try:
+        if file_extension not in SUPPORTED_EXTENSIONS:
+            spider.logger.warning(
+                f"Unsupported filetype, not uploading {item['source_filename']} (url: {item['source_file_url']}, page: {item['source_page_url']}) "
+            )
+        else:  # supported file extension
+            data = {
+                "authority": item["authority"],
+                "category": item["category"],
+                "category_local": item["category_local"],
+                "event_data_key": item["event_data_key"],
+                "source_scraper": "SIDE Scraper",
+                "source_file_url": item["source_file_url"],
+                "source_filename": item["source_filename"],
+                "source_page_url": item["source_page_url"],
+                "publication_date": item["publication_date"],
+                "publication_time": item["publication_time"],
+                "publication_datetime": item["publication_datetime"],
+                "year": str(item["year"]),
+            }
+            if item["file_from_zip"]:
+                data["source_file_zip_path"] = item["source_file_zip_path"]
+            try:
+                if not spider.dry_run:
                     spider.client.documents.upload(
                         file_path,
                         original_extension=file_extension.lstrip("."),
@@ -325,61 +322,44 @@ class UploadPipeline:
                         access=spider.access_level,
                         data=data,
                     )
-                except Exception as e:
-                    raise Exception("Upload error").with_traceback(e.__traceback__)
-
-                else:  # No upload error, add to event_data
-
-                    now = datetime.datetime.now().isoformat()
-
-                    # Zip files
-                    if item["file_from_zip"]:
-
-                        # Add the file to event_data documents
-
-                        item_relative_filepath = os.path.join(
-                            *item["local_file_path"].split(os.sep)[2:]
+            except Exception as e:
+                raise Exception("Upload error").with_traceback(e.__traceback__)
+            else:  # No upload error, add to event_data
+                now = datetime.datetime.now().isoformat()
+                # Zip files
+                if item["file_from_zip"]:
+                    # Add the file to event_data documents
+                    item_relative_filepath = os.path.join(
+                        *item["local_file_path"].split(os.sep)[2:]
+                    )
+                    event_data_path = (
+                        item["source_file_url"] + "/" + item_relative_filepath
+                    )
+                    spider.event_data["documents"][item["event_data_key"]] = {
+                        "last_modified": item["publication_lastmodified"],
+                        "last_seen": now,
+                    }
+                    # Check whether all files of the zip are in event_data documents
+                    zip_fully_processed = True
+                    for seen_file_path in item["zip_seen_supported_files"]:
+                        file_event_data_path = (
+                            item["source_file_url"] + "/" + seen_file_path
                         )
-
-                        event_data_path = (
-                            item["source_file_url"] + "/" + item_relative_filepath
-                        )
-
-                        spider.event_data["documents"][item["event_data_key"]] = {
+                        if file_event_data_path not in spider.event_data["documents"]:
+                            zip_fully_processed = False
+                    if zip_fully_processed:
+                        spider.event_data["zips"][item["source_file_url"]] = {
                             "last_modified": item["publication_lastmodified"],
                             "last_seen": now,
                         }
-
-                        # Check whether all files of the zip are in event_data documents
-                        zip_fully_processed = True
-
-                        for seen_file_path in item["zip_seen_supported_files"]:
-                            file_event_data_path = (
-                                item["source_file_url"] + "/" + seen_file_path
-                            )
-
-                            if (
-                                file_event_data_path
-                                not in spider.event_data["documents"]
-                            ):
-                                zip_fully_processed = False
-
-                        if zip_fully_processed:
-                            spider.event_data["zips"][item["source_file_url"]] = {
-                                "last_modified": item["publication_lastmodified"],
-                                "last_seen": now,
-                            }
-
-                    else:  # Not a file from a zip
-
-                        spider.event_data["documents"][item["event_data_key"]] = {
-                            "last_modified": item["publication_lastmodified"],
-                            "last_seen": now,
-                        }
-
-                    # Store event_data (# only from the web interface)
-                    if spider.run_id:
-                        spider.store_event_data(spider.event_data)
+                else:  # Not a file from a zip
+                    spider.event_data["documents"][item["event_data_key"]] = {
+                        "last_modified": item["publication_lastmodified"],
+                        "last_seen": now,
+                    }
+                # Store event_data (# only from the web interface)
+                if spider.run_id:
+                    spider.store_event_data(spider.event_data)
 
         return item
 
@@ -395,12 +375,12 @@ class UploadPipeline:
             else:
                 spider.logger.info("No event data to upload.")
 
-        # if not spider.run_id:
-        #     with open("event_data.json", "w") as file:
-        #         json.dump(spider.event_data, file)
-        #         spider.logger.info(
-        #             f"Saved file event_data.json ({len(spider.event_data['documents'])} documents, {len(spider.event_data['zips'])} zip files)"
-        #         )
+        if not spider.run_id:
+            with open("event_data.json", "w") as file:
+                json.dump(spider.event_data, file)
+                spider.logger.info(
+                    f"Saved file event_data.json ({len(spider.event_data['documents'])} documents, {len(spider.event_data['zips'])} zip files)"
+                )
 
 
 class MailPipeline:
