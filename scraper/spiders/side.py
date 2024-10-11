@@ -31,10 +31,10 @@ from .utils import (
 class SideSpider(scrapy.Spider):
     name = "SIDE_spider"
 
-    allowed_domains = [
-        "side.developpement-durable.gouv.fr",
-        "autorite-environnementale-entrepot.developpement-durable.gouv.fr",
-    ]
+    # allowed_domains = [
+    #     "side.developpement-durable.gouv.fr",
+    #     "autorite-environnementale-entrepot.developpement-durable.gouv.fr",
+    # ]
 
     upload_limit_attained = False
 
