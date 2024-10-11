@@ -266,7 +266,7 @@ class SideSpider(scrapy.Spider):
             for link in primary_docs_links:
                 link_text = link.css("span:last-of-type ::text").get()
                 link_href = link.attrib["href"]
-                link_href = link_href.replace("https://", "http://")
+                link_href = link_href.replace("http://", "https://")
                 link_text = link_text.replace("Consulter le ", "")
                 link_text = link_text.replace("Consulter la ", "")
 
