@@ -65,16 +65,17 @@ COOKIES_ENABLED = False
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    "scraper.pipelines.CountFilesInZipPipeline": 1,
+    # "scraper.pipelines.CountFilesInZipPipeline": 1,
     "scraper.pipelines.ParseDatePipeline": 100,
     "scraper.pipelines.CorrectYearPipeline": 200,
     "scraper.pipelines.CategoryPipeline": 300,
     "scraper.pipelines.SourceFileNamePipeline": 400,
     "scraper.pipelines.BeautifyPipeline": 500,
-    "scraper.pipelines.UploadLimitPipeline": 600,
-    "scraper.pipelines.UploadPipeline": 700,
-    "scraper.pipelines.MailPipeline": 800,
-    "scraper.pipelines.DeleteZipFilesPipeline": 900,
+    "scraper.pipelines.UnsupportedFiletypePipeline": 600,
+    "scraper.pipelines.UploadLimitPipeline": 700,
+    "scraper.pipelines.UploadPipeline": 800,
+    "scraper.pipelines.MailPipeline": 900,
+    "scraper.pipelines.DeleteZipFilesPipeline": 999,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
