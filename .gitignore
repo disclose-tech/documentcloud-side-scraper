@@ -130,7 +130,7 @@ dmypy.json
 
 # Custom
 __pycache__/
-data.csv
+data*.csv
 scrapy.log
 downloaded_zips/
-event_data.json
+event_data*.json
