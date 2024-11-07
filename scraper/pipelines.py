@@ -8,8 +8,6 @@ from urllib.parse import urlparse
 import logging
 import json
 
-import dateparser
-
 from itemadapter import ItemAdapter
 
 from scrapy.exceptions import DropItem
@@ -139,66 +137,6 @@ class BeautifyPipeline:
         item["project"] = item["project"].strip()
         item["project"] = item["project"].replace(" ", " ").replace("’", "'")
         item["project"] = item["project"].rstrip(".,")
-
-        # if item["authority"] == "Ministère de l'Environnement":
-        #     remove_at_start = [
-        #         # Avis...
-        #         "avis de l'autorité environnementale - ",
-        #         "avis de l'autorité environnementale relatif au ",
-        #         "avis d'autorité environnementale relatif au ",
-        #         "avis de l'autorité environnementale relatif à l'",
-        #         "avis de l'autorité environnementale relatif à la ",
-        #         "avis de l'autorité environnementale sur le ",
-        #         "avis de l'autorité environnementale :",
-        #         "avis de l'autorité environnementale portant sur le ",
-        #         "avis de l'autorité environnementale concernant le ",
-        #         # Décision...
-        #         "décision après examen au cas par cas relative au ",
-        #         "décision d'examen au cas par cas relative au ",
-        #         "décision après examen au cas par cas relative à la ",
-        #         "décision après examen au cas par cas relative à l'",
-        #         "décision après examen au cas par cas relative aux",
-        #         "décision après examen aucas par cas relative au ",
-        #         "décision après examen au cas par cas portant sur un ",
-        #         "décision après examen au cas par cas sur le ",
-        #         "décision après examen au cas par cas, sur le ",
-        #         "décision cas par cas portant sur le ",
-        #         "décision après examen au cas par cas, en application de l'article r.122.3 du code de l'environnement, sur le ",
-        #         "décision après examen au cas par cas, en application de l'article r. 122.3 du code de l'environnement, pour le ",
-        #         "décision de l'autorité environnementale après examen au cas par cas sur le ",
-        #         "décision de l'autorité environnementale, après examen au cas par cas, sur le ",
-        #         "décision de l'autorité environnementale portant sur le ",
-        #         "décision de l'autorité environnementale, après examen au cas par cas, portant sur le ",
-        #         "décision de l'autorité environnementale après examen au cas par cas concernant le ",
-        #         # Demande...
-        #         "demande d'examen au cas par cas relative au ",
-        #         "demande d'examen au cas par relative au ",
-        #         "demande d'examen au cas par cas du ",
-        #         "demande d'examen au cas par cas relative à la ",
-        #         "demande d'examen au cas par cas relative à l'",
-        #         "demande d'examen au cas par cas pour la ",
-        #         "demande au cas par cas pour le ",
-        #         "demande d'examen au cas par cas :",
-        #         "demande d'examen au cas par cas -",
-        #         "demande d'examen au cas par cas: ",
-        #         "demande d'examen au cas par cas concernant le ",
-        #         "demande d'examen au cas par cas concernant un ",
-        #         "demande d'examen au cas par cas portant sur la ",
-        #         "demande d'examen au cas par cas relatif au ",
-        #         # Retrait...
-        #         "retrait de la demande d'examen au cas par cas : ",
-        #     ]
-        #     for start in remove_at_start:
-
-        #         if item["project"].lower().startswith(start):
-        #             item["project"] = item["project"][len(start) :]
-
-        #     remove_at_start2 = ["dossier de"]
-
-        #     for start in remove_at_start2:
-        #         if item["project"].lower().startswith(start):
-        #             item["project"] = item["project"][len(start) :]
-
         item["project"] = item["project"][0].capitalize() + item["project"][1:]
 
         # Title
@@ -375,7 +313,7 @@ class UploadPipeline:
                     }
 
             # Store event_data (# only from the web interface)
-            if spider.run_id:
+            if spider.run_id and not spider.dry_run:
                 spider.store_event_data(spider.event_data)
 
         return item
