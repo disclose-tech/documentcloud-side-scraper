@@ -81,7 +81,7 @@ class DiscloseSideScraper(AddOn):
         # Add-on inputs
 
         self.run_name = self.data.get("run_name", "no name")
-        self.access_level = self.data["access_level"]
+        self.access_level = self.data.get("access_level", "private")
 
         self.target_year = self.data.get(
             "target_year", datetime.date.today().year

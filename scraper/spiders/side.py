@@ -171,7 +171,7 @@ class SideSpider(scrapy.Spider):
         response_dict = json.loads(response.text)
 
         if response_dict == None:
-            print(
+            self.logger.error(
                 f"Error parsing projects list, none returned: {authority}, {category}, {page})"
             )
 
