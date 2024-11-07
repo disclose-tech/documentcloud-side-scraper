@@ -13,15 +13,7 @@ from itemadapter import ItemAdapter
 from scrapy.exceptions import DropItem
 from documentcloud.constants import SUPPORTED_EXTENSIONS
 
-
-# class CountFilesInZipPipeline:
-
-#     def process_item(self, item, spider):
-
-#         if item["file_from_zip"]:
-#             item["zip_seen_supported_number"] = len(item["zip_seen_supported_files"])
-
-#         return item
+from .log import SilentDropItem
 
 
 class ParseDatePipeline:
@@ -193,7 +185,7 @@ class UploadLimitPipeline:
             return item
         else:
             spider.upload_limit_attained = True
-            raise DropItem("Upload limit exceeded.")
+            raise SilentDropItem("Upload limit exceeded.")
 
 
 class UploadPipeline:
