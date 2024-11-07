@@ -389,15 +389,32 @@ class UploadPipeline:
                 spider.logger.info(
                     f"Uploaded event data ({len(spider.event_data['documents'])} documents, {len(spider.event_data['zips'])} zip files)"
                 )
+
+                # Upload the event_data to the DocumentCloud interface
+                now = datetime.datetime.now()
+                timestamp = now.strftime("%Y%m%d_%H%M")
+                filename = f"event_data_DREAL_ARA_{timestamp}.json"
+
+                if spider.upload_event_data:
+                    with open(filename, "w+") as event_data_file:
+                        json.dump(spider.event_data, event_data_file)
+                        spider.upload_file(event_data_file)
+                    spider.logger.info(
+                        f"Uploaded event data to the Documentcloud interface."
+                    )
+
             else:
                 spider.logger.info("No event data to upload.")
 
         if not spider.run_id:
-            with open("event_data.json", "w") as file:
-                json.dump(spider.event_data, file)
-                spider.logger.info(
-                    f"Saved file event_data.json ({len(spider.event_data['documents'])} documents, {len(spider.event_data['zips'])} zip files)"
-                )
+            if spider.event_data:
+                with open("event_data.json", "w") as file:
+                    json.dump(spider.event_data, file)
+                    spider.logger.info(
+                        f"Saved file event_data.json ({len(spider.event_data['documents'])} documents, {len(spider.event_data['zips'])} zip files)"
+                    )
+            else:
+                spider.logger.info("No event data to write.")
 
 
 class MailPipeline:
