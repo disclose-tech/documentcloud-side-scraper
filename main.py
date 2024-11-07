@@ -131,7 +131,7 @@ class DiscloseSideScraper(AddOn):
         # Run
 
         self.set_message(
-            f"Scraping SIDE documents ({str(self.target_year)}) [{spider.run_name}]"
+            f"Scraping SIDE documents ({str(self.target_year)}) [{self.run_name}]"
         )
         process.start()
         self.set_message("Scraping complete!")
