@@ -38,6 +38,26 @@ class SideSpider(scrapy.Spider):
 
     upload_limit_attained = False
 
+    start_time = datetime.now()
+
+    def check_time_limit(self):
+        """Closes the spider automatically if it reaches the time limit"""
+
+        if self.time_limit != 0:
+
+            limit = self.time_limit * 60
+            now = datetime.now()
+
+            if timedelta.total_seconds(now - self.start_time) > limit:
+                raise CloseSpider(
+                    f"Closed due to time limit ({self.time_limit} minutes)"
+                )
+
+    def check_upload_limit(self):
+        """Closes the spider if the upload limit is attained."""
+        if self.upload_limit_attained:
+            raise CloseSpider("Closed due to max documents limit.")
+
     def start_requests(self):
 
         # Toggles
@@ -135,11 +155,6 @@ class SideSpider(scrapy.Spider):
                         ),
                     )
 
-    def check_upload_limit(self):
-        """Closes the spider if the upload limit is attained."""
-        if self.upload_limit_attained:
-            raise CloseSpider("Closed due to max documents limit.")
-
     def parse_projects_list(
         self,
         response,
@@ -149,6 +164,9 @@ class SideSpider(scrapy.Spider):
         category,
         page,
     ):
+
+        self.check_upload_limit()
+        self.check_time_limit()
 
         response_dict = json.loads(response.text)
 
@@ -232,6 +250,7 @@ class SideSpider(scrapy.Spider):
     ):
 
         self.check_upload_limit()
+        self.check_time_limit()
 
         if catalogue == "REUN":
             info = response.css(".item-datepublication").css("::text").get().strip()
@@ -305,6 +324,7 @@ class SideSpider(scrapy.Spider):
         start,
     ):
         self.check_upload_limit()
+        self.check_time_limit()
 
         response_dict = json.loads(response.body)
 
@@ -358,6 +378,7 @@ class SideSpider(scrapy.Spider):
     def parse_document_headers(self, response, doc_item):
 
         self.check_upload_limit()
+        self.check_time_limit()
 
         doc_item["publication_lastmodified"] = response.headers.get(
             "Last-Modified"
