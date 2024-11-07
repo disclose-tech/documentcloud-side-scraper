@@ -427,9 +427,7 @@ class MailPipeline:
 
             return item_string
 
-        subject = (
-            f"SIDE Scraper {str(spider.target_year)} (New: {len(self.scraped_items)} )"
-        )
+        subject = f"SIDE Scraper {str(spider.target_year)} (New: {len(self.scraped_items)}) [{spider.run_name}]"
 
         # errors_content = f"ERRORS ({len(self.items_with_error)})\n\n" + "\n\n".join(
         #     [print_item(item, error=True) for item in self.items_with_error]

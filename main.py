@@ -80,6 +80,7 @@ class DiscloseSideScraper(AddOn):
 
         # Add-on inputs
 
+        self.run_name = self.data.get("run_name", "no name")
         self.access_level = self.data["access_level"]
 
         self.target_year = self.data.get(
@@ -121,6 +122,7 @@ class DiscloseSideScraper(AddOn):
             access_level=self.access_level,
             dry_run=self.dry_run,
             run_id=self.id,
+            run_name=self.run_name,
             send_mail=self.send_mail,
             load_event_data=self.load_event_data,
             store_event_data=self.store_event_data,
@@ -128,7 +130,9 @@ class DiscloseSideScraper(AddOn):
 
         # Run
 
-        self.set_message(f"Scraping SIDE documents ({str(self.target_year)})")
+        self.set_message(
+            f"Scraping SIDE documents ({str(self.target_year)}) [{spider.run_name}]"
+        )
         process.start()
         self.set_message("Scraping complete!")
 
