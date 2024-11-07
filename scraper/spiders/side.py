@@ -10,7 +10,6 @@ from datetime import datetime, timedelta
 import scrapy
 from scrapy.http import Request
 from scrapy.exceptions import CloseSpider
-from scrapy.shell import inspect_response
 
 from documentcloud.constants import SUPPORTED_EXTENSIONS
 
