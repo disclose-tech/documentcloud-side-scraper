@@ -323,7 +323,7 @@ class UploadPipeline:
                 # Upload the event_data to the DocumentCloud interface
                 now = datetime.datetime.now()
                 timestamp = now.strftime("%Y%m%d_%H%M")
-                filename = f"event_data_DREAL_ARA_{timestamp}.json"
+                filename = f"event_data_SIDE_{timestamp}.json"
 
                 if spider.upload_event_data:
                     with open(filename, "w+") as event_data_file:
