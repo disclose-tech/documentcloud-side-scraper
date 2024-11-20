@@ -285,9 +285,7 @@ class UploadPipeline:
             raise Exception("Upload error").with_traceback(e.__traceback__)
 
         else:  # No upload error, add to event_data
-            last_modified = datetime.datetime.strptime(
-                item["publication_lastmodified"], "%a, %d %b %Y %H:%M:%S %Z"
-            ).isoformat()
+            last_modified = item["publication_timestamp"][:-1]  # remove Z at the end.
             now = datetime.datetime.now().isoformat(timespec="seconds")
 
             spider.event_data["documents"][item["event_data_key"]] = {
