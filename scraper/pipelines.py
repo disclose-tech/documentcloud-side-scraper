@@ -131,6 +131,19 @@ class BeautifyPipeline:
         item["project"] = item["project"].rstrip(".,")
         item["project"] = item["project"][0].capitalize() + item["project"][1:]
 
+        # Projet_01 > Project (01)
+        item["project"] = re.sub(
+            r"_([02][1-9]|2[AB]|[1345678][0-9]|9[012345]|97[1-8])$",
+            r" (\1)",
+            item["project"],
+        )
+        # Add missing parenthesis at the end
+        item["project"] = re.sub(
+            r"\(([02][1-9]|2[AB]|[1345678][0-9]|9[012345]|97[1-8])$",
+            r"(\1)",
+            item["project"],
+        )
+
         # Title
         if item["file_from_zip"]:
 
