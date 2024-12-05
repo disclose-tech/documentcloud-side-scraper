@@ -163,6 +163,11 @@ class BeautifyPipeline:
         item["title"] = item["title"].strip()
         item["title"] = item["title"][0].capitalize() + item["title"][1:]
 
+        # Authority
+
+        if item["authority"] == "Préfecture de région Île de France":
+            item["authority"] = "Préfecture de région Île-de-France"
+
         return item
 
 
