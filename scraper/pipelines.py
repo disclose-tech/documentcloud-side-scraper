@@ -9,7 +9,6 @@ import logging
 import json
 
 from itemadapter import ItemAdapter
-
 from scrapy.exceptions import DropItem
 from documentcloud.constants import SUPPORTED_EXTENSIONS
 
@@ -123,7 +122,7 @@ class SourceFileNamePipeline:
 
 class BeautifyPipeline:
     def process_item(self, item, spider):
-        """Beautify & harmonize project & title names."""
+        """Beautify & harmonize metadata."""
 
         # Project
 
@@ -229,6 +228,22 @@ class TagDepartmentsPipeline:
         return item
 
 
+class ProjectIDPipeline:
+
+    def process_item(self, item, spider):
+
+        project_name = item["project"]
+        source_page_url = item["source_page_url"]
+        string_to_hash = source_page_url + " " + project_name
+
+        hash_object = hashlib.sha256(string_to_hash.encode())
+        hex_dig = hash_object.hexdigest()
+
+        item["project_id"] = hex_dig
+
+        return item
+
+
 class UploadPipeline:
     """Upload document to DocumentCloud & store event data."""
 
@@ -305,6 +320,7 @@ class UploadPipeline:
             "publication_time": item["publication_time"],
             "publication_datetime": item["publication_datetime"],
             "year": str(item["year"]),
+            "project_id": item["project_id"],
         }
         if item["file_from_zip"]:
             data["source_file_zip_path"] = item["source_file_zip_path"]

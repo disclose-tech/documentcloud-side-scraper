@@ -8,6 +8,7 @@ class DocumentItem(Item):
 
     title = Field()
     project = Field()
+    project_id = Field()
     year = Field()
 
     source = Field()
