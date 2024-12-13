@@ -172,6 +172,9 @@ class BeautifyPipeline:
         if item["authority"] == "Préfecture de région Île de France":
             item["authority"] = "Préfecture de région Île-de-France"
 
+        if item["authority"] == "Préfecture de région Bourgogne-Franche Comté":
+            item["authority"] = "Préfecture de région Bourgogne-Franche-Comté"
+
         return item
 
 
