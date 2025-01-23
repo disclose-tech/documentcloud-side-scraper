@@ -70,7 +70,7 @@ COOKIES_ENABLED = False
 ITEM_PIPELINES = {
     # "scraper.pipelines.CountFilesInZipPipeline": 1,
     "scraper.pipelines.ParseDatePipeline": 100,
-    "scraper.pipelines.CorrectYearPipeline": 200,
+    # "scraper.pipelines.CorrectYearPipeline": 200,
     "scraper.pipelines.CategoryPipeline": 300,
     "scraper.pipelines.SourceFileNamePipeline": 400,
     "scraper.pipelines.BeautifyPipeline": 500,

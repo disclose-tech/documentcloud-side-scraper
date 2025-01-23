@@ -53,37 +53,37 @@ class ParseDatePipeline:
         return item
 
 
-class CorrectYearPipeline:
-    """Correct Year field based on project info."""
+# class CorrectYearPipeline:
+#     """Correct Year field based on project info."""
 
-    """This is needed because the filter for the last year on SIDE includes documents from previous years where a decision hasn't been recorded."""
+#     """This is needed because the filter for the last year on SIDE includes documents from previous years where a decision hasn't been recorded."""
 
-    def process_item(self, item, spider):
+#     def process_item(self, item, spider):
 
-        # Extract all years from info
-        years_in_info = re.findall("20\d\d", item["info"])
+#         # Extract all years from info
+#         years_in_info = re.findall("20\d\d", item["info"])
 
-        years_in_info = [int(x) for x in years_in_info]
+#         years_in_info = [int(x) for x in years_in_info]
 
-        if int(spider.target_year) in years_in_info:
-            item["year"] = spider.target_year
+#         if int(spider.target_year) in years_in_info:
+#             item["year"] = spider.target_year
 
-        else:
+#         else:
 
-            # in some cases, add the publication year
-            if not "Date limite d'avis :" in item["info"]:
+#             # in some cases, add the publication year
+#             if not "Date limite d'avis :" in item["info"]:
 
-                publication_year = int(item["publication_date"][:4])
+#                 publication_year = int(item["publication_date"][:4])
 
-                years_in_info.append(publication_year)
+#                 years_in_info.append(publication_year)
 
-            # Take the greatest year, set it as year
+#             # Take the greatest year, set it as year
 
-            max_year = max(years_in_info)
+#             max_year = max(years_in_info)
 
-            item["year"] = max_year
+#             item["year"] = max_year
 
-        return item
+#         return item
 
 
 class CategoryPipeline:
@@ -162,6 +162,7 @@ class BeautifyPipeline:
                     + [os.path.splitext(os.path.basename(item["local_file_path"]))[0]]
                 ]
             )
+
         item["title"] = item["title"].replace("_", " ")
         item["title"] = item["title"].rstrip(".,")
         item["title"] = item["title"].strip()
@@ -326,14 +327,14 @@ class UploadPipeline:
             "category": item["category"],
             "category_local": item["category_local"],
             "event_data_key": item["event_data_key"],
-            "source_scraper": f"SIDE Scraper {spider.target_year}",
+            "source_scraper": f"SIDE Scraper {spider.target_years[0]}-{spider.target_years[-1]}",
             "source_file_url": item["source_file_url"],
             "source_filename": item["source_filename"],
             "source_page_url": item["source_page_url"],
             "publication_date": item["publication_date"],
             "publication_time": item["publication_time"],
             "publication_datetime": item["publication_datetime"],
-            "year": str(item["year"]),
+            # "year": str(item["year"]),
             "project_id": item["project_id"],
         }
         if item["file_from_zip"]:
@@ -369,7 +370,7 @@ class UploadPipeline:
             spider.event_data["documents"][item["event_data_key"]] = {
                 "last_modified": last_modified,
                 "last_seen": now,
-                "target_year": spider.target_year,
+                "target_year": item["year"],
             }
             # Zip files
             if item["file_from_zip"]:
@@ -385,7 +386,7 @@ class UploadPipeline:
                     spider.event_data["zips"][item["source_file_url"]] = {
                         "last_modified": last_modified,
                         "last_seen": now,
-                        "target_year": spider.target_year,
+                        "target_year": item["year"],
                     }
 
             # Store event_data (# only from the web interface)
@@ -462,7 +463,7 @@ class MailPipeline:
 
             return item_string
 
-        subject = f"SIDE Scraper {str(spider.target_year)} (New: {len(self.scraped_items)}) [{spider.run_name}]"
+        subject = f"SIDE Scraper {str(spider.target_years[0])}-{str(spider.target_years[-1])} (New: {len(self.scraped_items)}) [{spider.run_name}]"
 
         # errors_content = f"ERRORS ({len(self.items_with_error)})\n\n" + "\n\n".join(
         #     [print_item(item, error=True) for item in self.items_with_error]
@@ -495,5 +496,5 @@ class DeleteZipFilesPipeline:
     def close_spider(self, spider):
 
         # Delete the downloaded_zips folder
-        if os.path.isdir("downloaded_zips"):
-            shutil.rmtree("downloaded_zips")
+        if os.path.isdir("downloaded_files"):
+            shutil.rmtree("downloaded_files")

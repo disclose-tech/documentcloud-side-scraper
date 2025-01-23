@@ -65,47 +65,21 @@ class SideSpider(scrapy.Spider):
         ae_region = True
         ae_region_specialcases = True
 
-        # AE Ministre
-        if ae_ministre:
-            for category in AE_CGDD["categories"]:
+        target_years_reverse = list(self.target_years)[
+            ::-1
+        ]  # Scrape newest documents first
+        for target_year in target_years_reverse:
 
-                catalogue = AE_CGDD["catalogue"]
-                json_data = make_json_data(
-                    query_string=AE_CGDD["categories"][category],
-                    scenario_code=AE_CGDD["scenario_code"],
-                    year_filter=AE_CGDD["year_filter"],
-                    target_year=self.target_year,
-                )
+            # AE Ministre
+            if ae_ministre:
+                for category in AE_CGDD["categories"]:
 
-                yield Request(
-                    url=SEARCH_ENDPOINT.format(catalogue=catalogue),
-                    headers=HEADERS,
-                    method="POST",
-                    body=json.dumps(json_data),
-                    callback=self.parse_projects_list,
-                    cb_kwargs=dict(
-                        authority="Ministère de l'Environnement",
-                        catalogue=catalogue,
-                        category=category,
-                        page=0,
-                        year_filter=AE_CGDD["year_filter"],
-                    ),
-                )
-
-        # AE Préfet de région
-        if ae_region:
-            for region in REGIONS:
-
-                catalogue = "PAE"
-                config = make_region_config(region)
-
-                for category in config["categories"]:
-
+                    catalogue = AE_CGDD["catalogue"]
                     json_data = make_json_data(
-                        query_string=config["categories"][category],
-                        scenario_code="AE-GENERAL",
-                        year_filter=config["year_filter"],
-                        target_year=self.target_year,
+                        query_string=AE_CGDD["categories"][category],
+                        scenario_code=AE_CGDD["scenario_code"],
+                        year_filter=AE_CGDD["year_filter"],
+                        target_year=target_year,
                     )
 
                     yield Request(
@@ -115,54 +89,86 @@ class SideSpider(scrapy.Spider):
                         body=json.dumps(json_data),
                         callback=self.parse_projects_list,
                         cb_kwargs=dict(
-                            authority=f"Préfecture de région {region}",
+                            authority="Ministère de l'Environnement",
                             catalogue=catalogue,
                             category=category,
                             page=0,
+                            year_filter=AE_CGDD["year_filter"],
+                            year=target_year,
+                        ),
+                    )
+
+            # AE Préfet de région
+            if ae_region:
+                for region in REGIONS:
+
+                    catalogue = "PAE"
+                    config = make_region_config(region)
+
+                    for category in config["categories"]:
+
+                        json_data = make_json_data(
+                            query_string=config["categories"][category],
+                            scenario_code="AE-GENERAL",
                             year_filter=config["year_filter"],
-                        ),
-                    )
+                            target_year=target_year,
+                        )
 
-        # Special cases
-        if ae_region_specialcases:
-            for region in REGIONS_SPECIAL_CASES:
+                        yield Request(
+                            url=SEARCH_ENDPOINT.format(catalogue=catalogue),
+                            headers=HEADERS,
+                            method="POST",
+                            body=json.dumps(json_data),
+                            callback=self.parse_projects_list,
+                            cb_kwargs=dict(
+                                authority=f"Préfecture de région {region}",
+                                catalogue=catalogue,
+                                category=category,
+                                page=0,
+                                year_filter=config["year_filter"],
+                                year=target_year,
+                            ),
+                        )
 
-                catalogue = REGIONS_SPECIAL_CASES[region]["catalogue"]
+            # Special cases
+            if ae_region_specialcases:
+                for region in REGIONS_SPECIAL_CASES:
 
-                for category in REGIONS_SPECIAL_CASES[region]["categories"]:
+                    catalogue = REGIONS_SPECIAL_CASES[region]["catalogue"]
 
-                    json_data = json_data = make_json_data(
-                        query_string=REGIONS_SPECIAL_CASES[region]["categories"][
-                            category
-                        ],
-                        scenario_code=REGIONS_SPECIAL_CASES[region]["scenario_code"],
-                        year_filter=REGIONS_SPECIAL_CASES[region]["year_filter"],
-                        target_year=self.target_year,
-                    )
+                    for category in REGIONS_SPECIAL_CASES[region]["categories"]:
 
-                    yield Request(
-                        url=SEARCH_ENDPOINT.format(catalogue=catalogue),
-                        headers=HEADERS,
-                        method="POST",
-                        body=json.dumps(json_data),
-                        callback=self.parse_projects_list,
-                        cb_kwargs=dict(
-                            authority=f"Préfecture de région {region}",
-                            catalogue=catalogue,
-                            category=category,
-                            page=0,
+                        json_data = json_data = make_json_data(
+                            query_string=REGIONS_SPECIAL_CASES[region]["categories"][
+                                category
+                            ],
+                            scenario_code=REGIONS_SPECIAL_CASES[region][
+                                "scenario_code"
+                            ],
                             year_filter=REGIONS_SPECIAL_CASES[region]["year_filter"],
-                        ),
-                    )
+                            target_year=target_year,
+                        )
+
+                        yield Request(
+                            url=SEARCH_ENDPOINT.format(catalogue=catalogue),
+                            headers=HEADERS,
+                            method="POST",
+                            body=json.dumps(json_data),
+                            callback=self.parse_projects_list,
+                            cb_kwargs=dict(
+                                authority=f"Préfecture de région {region}",
+                                catalogue=catalogue,
+                                category=category,
+                                page=0,
+                                year_filter=REGIONS_SPECIAL_CASES[region][
+                                    "year_filter"
+                                ],
+                                year=target_year,
+                            ),
+                        )
 
     def parse_projects_list(
-        self,
-        response,
-        year_filter,
-        authority,
-        catalogue,
-        category,
-        page,
+        self, response, year_filter, authority, catalogue, category, page, year
     ):
 
         self.check_upload_limit()
@@ -180,12 +186,10 @@ class SideSpider(scrapy.Spider):
 
         if not max_page == -1:
             self.logger.info(
-                f"{authority} - {category} ({self.target_year}): Scraping page {current_page+1}/{max_page+1}"
+                f"{authority} - {category} ({year}): Scraping page {current_page+1}/{max_page+1}"
             )
         else:
-            self.logger.info(
-                f"{authority} - {category} ({self.target_year}): No results"
-            )
+            self.logger.info(f"{authority} - {category} ({year}): No results")
 
         results = response_dict["d"]["Results"]
 
@@ -209,7 +213,9 @@ class SideSpider(scrapy.Spider):
                             rsc_id=r["Resource"]["RscId"],
                             has_digital_ready_docs=has_digital_ready_docs,
                             year_filter=year_filter,
+                            year=year,
                         ),
+                        meta=dict(dont_cache=True),
                     )
 
         # Parse next page
@@ -219,7 +225,7 @@ class SideSpider(scrapy.Spider):
                 query_string=response_dict["d"]["Query"]["QueryString"],
                 scenario_code=response_dict["d"]["Query"]["ScenarioCode"],
                 page=page + 1,
-                target_year=self.target_year,
+                target_year=year,
                 year_filter=year_filter,
             )
             yield Request(
@@ -234,6 +240,7 @@ class SideSpider(scrapy.Spider):
                     category=category,
                     page=page + 1,
                     year_filter=year_filter,
+                    year=year,
                 ),
             )
 
@@ -247,6 +254,7 @@ class SideSpider(scrapy.Spider):
         rsc_id,
         has_digital_ready_docs,
         year_filter,
+        year,
     ):
 
         self.check_upload_limit()
@@ -276,6 +284,7 @@ class SideSpider(scrapy.Spider):
                     source_page_url=response.request.url,
                     info=info,
                     start=0,
+                    year=year,
                 ),
             )
         else:
@@ -301,6 +310,7 @@ class SideSpider(scrapy.Spider):
                         source_file_url=link_href,
                         source_page_url=response.request.url,
                         info=info,
+                        year=year,
                     )
 
                     yield Request(
@@ -322,6 +332,7 @@ class SideSpider(scrapy.Spider):
         source_page_url,
         info,
         start,
+        year,
     ):
         self.check_upload_limit()
         self.check_time_limit()
@@ -351,6 +362,7 @@ class SideSpider(scrapy.Spider):
                         publication_lastmodified=doc["whenUpdated"],
                         info=info,
                         file_from_zip=False,
+                        year=year,
                     )
 
             # Next pages
@@ -372,6 +384,7 @@ class SideSpider(scrapy.Spider):
                         project=project,
                         rsc_id=rsc_id,
                         source_page_url=response.request.url,
+                        year=year,
                     ),
                 )
 
@@ -470,4 +483,5 @@ class SideSpider(scrapy.Spider):
                         local_file_path=str(f),
                         zip_seen_supported_files=zip_seen_supported_files,
                         file_from_zip=True,
+                        year=doc_item["year"],
                     )
