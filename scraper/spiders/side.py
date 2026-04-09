@@ -58,7 +58,7 @@ class SideSpider(scrapy.Spider):
         if self.upload_limit_attained:
             raise CloseSpider("Closed due to max documents limit.")
 
-    def start_requests(self):
+    async def start(self):
 
         # Toggles
         ae_ministre = True
