@@ -78,6 +78,11 @@ class DiscloseSideScraper(AddOn):
     def main(self):
         """Add-on main functionality."""
 
+        # User agent
+        self.client.session.headers.update(
+            {"User-Agent": "Disclose SIDE Scraper Add-On"}
+        )
+
         # Add-on inputs
 
         self.run_name = self.data.get("run_name", "no name")
