@@ -125,7 +125,11 @@ class DiscloseSideScraper(AddOn):
         # Load scraper settings and create process
 
         os.environ.setdefault("SCRAPY_SETTINGS_MODULE", scraper_settings.__name__)
-        process = CrawlerProcess(get_project_settings())
+        settings = get_project_settings()
+        if self.time_limit:
+            # Time limit enforced through the CloseSpider extension
+            settings.set("CLOSESPIDER_TIMEOUT", self.time_limit * 60)
+        process = CrawlerProcess(settings)
 
         # Launch scraper
 

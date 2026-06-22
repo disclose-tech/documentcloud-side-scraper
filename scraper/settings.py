@@ -62,9 +62,11 @@ COOKIES_ENABLED = False
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
-# EXTENSIONS = {
-#    "scrapy.extensions.telnet.TelnetConsole": None,
-# }
+EXTENSIONS = {
+    # Time limit enforced through the CloseSpider extension.
+    # CLOSESPIDER_TIMEOUT is set per-run from the addon's time_limit in main.py.
+    "scrapy.extensions.closespider.CloseSpider": 100,
+}
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
@@ -113,7 +115,8 @@ FEED_EXPORT_ENCODING = "utf-8"
 
 TELNETCONSOLE_ENABLED = False
 
-RETRY_TIMES = 4
+DOWNLOAD_TIMEOUT = 30
+RETRY_TIMES = 3
 
 # Development settings
 AUTOTHROTTLE_DEBUG = False

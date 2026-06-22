@@ -5,7 +5,6 @@ import os
 from urllib.parse import urlsplit
 from zipfile import ZipFile
 from pathlib import Path
-from datetime import datetime, timedelta
 
 import scrapy
 from scrapy.http import Request
@@ -37,21 +36,6 @@ class SideSpider(scrapy.Spider):
     # ]
 
     upload_limit_attained = False
-
-    start_time = datetime.now()
-
-    def check_time_limit(self):
-        """Closes the spider automatically if it reaches the time limit"""
-
-        if self.time_limit != 0:
-
-            limit = self.time_limit * 60
-            now = datetime.now()
-
-            if timedelta.total_seconds(now - self.start_time) > limit:
-                raise CloseSpider(
-                    f"Closed due to time limit ({self.time_limit} minutes)"
-                )
 
     def check_upload_limit(self):
         """Closes the spider if the upload limit is attained."""
@@ -172,7 +156,6 @@ class SideSpider(scrapy.Spider):
     ):
 
         self.check_upload_limit()
-        self.check_time_limit()
 
         response_dict = json.loads(response.text)
 
@@ -258,7 +241,6 @@ class SideSpider(scrapy.Spider):
     ):
 
         self.check_upload_limit()
-        self.check_time_limit()
 
         if catalogue == "REUN":
             info = response.css(".item-datepublication").css("::text").get().strip()
@@ -335,7 +317,6 @@ class SideSpider(scrapy.Spider):
         year,
     ):
         self.check_upload_limit()
-        self.check_time_limit()
 
         response_dict = json.loads(response.body)
 
@@ -391,7 +372,6 @@ class SideSpider(scrapy.Spider):
     def parse_document_headers(self, response, doc_item):
 
         self.check_upload_limit()
-        self.check_time_limit()
 
         doc_item["publication_lastmodified"] = response.headers.get(
             "Last-Modified"
