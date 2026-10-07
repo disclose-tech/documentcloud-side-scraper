@@ -37,6 +37,12 @@ class SideSpider(scrapy.Spider):
 
     upload_limit_attained = False
 
+    def is_known(self, key, section="documents"):
+        """Whether the entry is in the archived or live event data ("documents" or "zips")."""
+        return (
+            key in self.archived_event_data[section] or key in self.event_data[section]
+        )
+
     def check_upload_limit(self):
         """Closes the spider if the upload limit is attained."""
         if self.upload_limit_attained:
@@ -281,8 +287,8 @@ class SideSpider(scrapy.Spider):
                 link_text = link_text.replace("Consulter la ", "")
 
                 if (
-                    link_href not in self.event_data["documents"]
-                    and link_href not in self.event_data["zips"]
+                    not self.is_known(link_href)
+                    and not self.is_known(link_href, "zips")
                 ):
                     doc_item = DocumentItem(
                         title=link_text,
@@ -331,7 +337,7 @@ class SideSpider(scrapy.Spider):
                     document_id=doc["documentId"],
                 )
 
-                if not source_file_url in self.event_data["documents"]:
+                if not self.is_known(source_file_url):
                     yield DocumentItem(
                         title=doc["title"],
                         project=project,
@@ -450,7 +456,7 @@ class SideSpider(scrapy.Spider):
                     doc_item["source_file_url"] + "/" + item_relative_filepath
                 )
 
-                if not event_data_path in self.event_data["documents"]:
+                if not self.is_known(event_data_path):
                     yield DocumentItem(
                         project=doc_item["project"],
                         category_local=doc_item["category_local"],
